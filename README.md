@@ -328,6 +328,11 @@ ALC_CountdownTick(int $InstanceID);
 
 ## Changelog
 
+### Version 2.1.0
+- **Bugfix**: Configuration changes (e.g., adding a lamp) no longer reset variable values set by the user
+- **Bugfix**: Active timers and operational state (auto-off countdown, push-button state, etc.) are preserved across configuration changes
+- Default values are now only applied to newly created variables, not on every configuration save
+
 ### Version 2.0.0
 - **Breaking Change**: Removed Enable* checkboxes from instance configuration
 - All variables are now always created (no conditional creation)

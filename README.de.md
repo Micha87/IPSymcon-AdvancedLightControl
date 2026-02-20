@@ -312,6 +312,11 @@ ALC_SetAutoOffEnabled(12345, false);
 
 ## Changelog
 
+### Version 2.1.0
+- **Bugfix**: Konfigurationsänderungen (z.B. Hinzufügen einer Lampe) setzen die vom Benutzer gesetzten Variablenwerte nicht mehr zurück
+- **Bugfix**: Aktive Timer und Betriebszustand (Auto-Off-Countdown, Taster-Status, etc.) bleiben bei Konfigurationsänderungen erhalten
+- Standardwerte werden jetzt nur noch bei neu erstellten Variablen gesetzt, nicht mehr bei jedem Speichern der Konfiguration
+
 ### Version 2.0.0
 - **Breaking Change**: Enable*-Checkboxen aus Instanzkonfiguration entfernt
 - Alle Variablen werden jetzt immer erstellt (keine bedingte Erstellung mehr)

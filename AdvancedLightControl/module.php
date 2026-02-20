@@ -53,6 +53,18 @@ class AdvancedLightControl extends IPSModule
 
         $this->ensureProfiles();
 
+        // Track which variables are new (don't exist yet) so we only set defaults for those
+        $newVariables = [];
+        $varsToCheck = ['MasterSwitch', 'SwitchesEnabled', 'PresenceEnabled', 'PresenceFollowUpTime',
+            'BrightnessEnabled', 'BrightnessThreshold', 'AutoOffEnabled', 'AutoOffTime',
+            'RemainingTime', 'ExtendTimer', 'NotificationsEnabled', 'NotificationThreshold'];
+        foreach ($varsToCheck as $ident) {
+            $varID = @$this->GetIDForIdent($ident);
+            if (!$varID || !@IPS_VariableExists($varID)) {
+                $newVariables[$ident] = true;
+            }
+        }
+
         // Always create master switch variable
         $this->MaintainVariable('MasterSwitch', $this->Translate('All Lights'), VARIABLETYPE_BOOLEAN, [
             'PRESENTATION' => VARIABLE_PRESENTATION_SWITCH,
@@ -68,7 +80,9 @@ class AdvancedLightControl extends IPSModule
             'ICON_OFF' => 'Power'
         ], 2, true);
         $this->EnableAction('SwitchesEnabled');
-        $this->initializeVariableDefault('SwitchesEnabled', false);
+        if (isset($newVariables['SwitchesEnabled'])) {
+            $this->initializeVariableDefault('SwitchesEnabled', false);
+        }
 
         // Presence detection variables (positions 3-4)
         $this->MaintainVariable('PresenceEnabled', $this->Translate('Presence Detection'), VARIABLETYPE_BOOLEAN, [
@@ -82,8 +96,12 @@ class AdvancedLightControl extends IPSModule
         ], 4, true);
         $this->EnableAction('PresenceEnabled');
         $this->EnableAction('PresenceFollowUpTime');
-        $this->initializeVariableDefault('PresenceEnabled', false);
-        $this->initializeVariableDefault('PresenceFollowUpTime', 60);
+        if (isset($newVariables['PresenceEnabled'])) {
+            $this->initializeVariableDefault('PresenceEnabled', false);
+        }
+        if (isset($newVariables['PresenceFollowUpTime'])) {
+            $this->initializeVariableDefault('PresenceFollowUpTime', 60);
+        }
 
         // Brightness control variables (positions 5-6)
         $this->MaintainVariable('BrightnessEnabled', $this->Translate('Brightness Control'), VARIABLETYPE_BOOLEAN, [
@@ -97,8 +115,12 @@ class AdvancedLightControl extends IPSModule
         ], 6, true);
         $this->EnableAction('BrightnessEnabled');
         $this->EnableAction('BrightnessThreshold');
-        $this->initializeVariableDefault('BrightnessEnabled', false);
-        $this->initializeVariableDefault('BrightnessThreshold', 100);
+        if (isset($newVariables['BrightnessEnabled'])) {
+            $this->initializeVariableDefault('BrightnessEnabled', false);
+        }
+        if (isset($newVariables['BrightnessThreshold'])) {
+            $this->initializeVariableDefault('BrightnessThreshold', 100);
+        }
 
         // Auto-off variables (positions 7-12)
         $this->MaintainVariable('AutoOffEnabled', $this->Translate('Auto-Off'), VARIABLETYPE_BOOLEAN, [
@@ -136,26 +158,21 @@ class AdvancedLightControl extends IPSModule
         $this->EnableAction('ExtendTimer');
         $this->EnableAction('NotificationsEnabled');
         $this->EnableAction('NotificationThreshold');
-        $this->initializeVariableDefault('AutoOffEnabled', false);
-        $this->initializeVariableDefault('AutoOffTime', 300);
-        $this->initializeVariableDefault('NotificationsEnabled', false);
-        $this->initializeVariableDefault('NotificationThreshold', 60);
+        if (isset($newVariables['AutoOffEnabled'])) {
+            $this->initializeVariableDefault('AutoOffEnabled', false);
+        }
+        if (isset($newVariables['AutoOffTime'])) {
+            $this->initializeVariableDefault('AutoOffTime', 300);
+        }
+        if (isset($newVariables['NotificationsEnabled'])) {
+            $this->initializeVariableDefault('NotificationsEnabled', false);
+        }
+        if (isset($newVariables['NotificationThreshold'])) {
+            $this->initializeVariableDefault('NotificationThreshold', 60);
+        }
 
         // Register message subscriptions for lamps, presence detectors, and brightness sensor
         $this->registerMessages();
-
-        // Stop timers on config change
-        $this->SetTimerInterval('AutoOff', 0);
-        $this->SetTimerInterval('CountdownTick', 0);
-        $this->SetTimerInterval('PresenceFollowUp', 0);
-        $this->WriteAttributeInteger('AutoOffUntil', 0);
-        $this->WriteAttributeBoolean('NotificationSent', false);
-        $this->WriteAttributeBoolean('AutoOffTriggered', false);
-        $this->WriteAttributeBoolean('ManualSwitchOn', false);
-        $this->WriteAttributeBoolean('PresenceWasActiveOnManualSwitch', false);
-        $this->WriteAttributeBoolean('PushButtonState', false);
-
-        @SetValue($this->GetIDForIdent('RemainingTime'), 0);
 
         // Update master switch state based on current lamp states
         $this->updateMasterSwitchState();
