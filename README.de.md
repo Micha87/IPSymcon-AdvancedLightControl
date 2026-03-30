@@ -345,6 +345,7 @@ ALC_SetAutoOffEnabled(12345, false);
 Bei Problemen, Funktionswünschen oder Beiträgen besuchen Sie bitte:
 - [GitHub Repository](https://github.com/mwlf01/IPSymcon-AdvancedLightControl)
 - [GitHub Issues](https://github.com/mwlf01/IPSymcon-AdvancedLightControl/issues)
+- [Symcon Community](https://community.symcon.de/) – Benutzer: **mwlf**
 
 ---
 
@@ -361,3 +362,4 @@ Die MIT-Lizenz erlaubt die freie Nutzung, Modifikation und Weitergabe der Softwa
 **mwlf01**
 
 - GitHub: [@mwlf01](https://github.com/mwlf01)
+- Symcon Community: [mwlf](https://community.symcon.de/)
