@@ -805,6 +805,11 @@ class AdvancedLightControl extends IPSModule
             // Presence detected - cancel any follow-up timer
             $this->SetTimerInterval('PresenceFollowUp', 0);
 
+            // Lights are already on: renewed presence extends/resets auto-off timer
+            if ($masterSwitch && $this->isAutoOffActive()) {
+                $this->armAutoOffTimer();
+            }
+
             // Check if we should turn on lights
             if (!$masterSwitch) {
                 // Lights are off - check if we should turn them on
