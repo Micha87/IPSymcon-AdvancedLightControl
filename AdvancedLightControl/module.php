@@ -385,7 +385,12 @@ class AdvancedLightControl extends IPSModule
 
             case 'AutoOffEnabled':
                 SetValue($this->GetIDForIdent('AutoOffEnabled'), (bool)$Value);
-                if (!(bool)$Value) {
+                if ((bool)$Value) {
+                    $masterSwitch = (bool)@GetValue($this->GetIDForIdent('MasterSwitch'));
+                    if ($masterSwitch) {
+                        $this->armAutoOffTimer();
+                    }
+                } else {
                     $this->stopTimer();
                 }
                 break;
@@ -637,7 +642,12 @@ class AdvancedLightControl extends IPSModule
     public function SetAutoOffEnabled(bool $Enabled): void
     {
         SetValue($this->GetIDForIdent('AutoOffEnabled'), $Enabled);
-        if (!$Enabled) {
+        if ($Enabled) {
+            $masterSwitch = (bool)@GetValue($this->GetIDForIdent('MasterSwitch'));
+            if ($masterSwitch) {
+                $this->armAutoOffTimer();
+            }
+        } else {
             $this->stopTimer();
         }
     }
