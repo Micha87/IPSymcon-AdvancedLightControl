@@ -22,6 +22,7 @@ class AdvancedLightControl extends IPSModule
 
         // ---- Properties: Presence Detectors ----
         $this->RegisterPropertyString('PresenceDetectors', '[]');
+        $this->RegisterPropertyBoolean('StartFollowUpOnSwitchOn', false);
 
         // ---- Properties: Brightness Sensor ----
         $this->RegisterPropertyInteger('BrightnessSensor', 0);
@@ -268,6 +269,11 @@ class AdvancedLightControl extends IPSModule
                     'type' => 'ExpansionPanel',
                     'caption' => 'Presence Detection',
                     'items' => [
+                        [
+                            'type' => 'CheckBox',
+                            'name' => 'StartFollowUpOnSwitchOn',
+                            'caption' => 'Start Follow-Up Timer when lights are switched on'
+                        ],
                         [
                             'type' => 'List',
                             'name' => 'PresenceDetectors',
@@ -516,6 +522,12 @@ class AdvancedLightControl extends IPSModule
             }
             $this->WriteAttributeBoolean('AutoOffTriggered', false);
             $this->SetTimerInterval('PresenceFollowUp', 0);
+
+            // Optionally start presence follow-up timer immediately on switch-on
+            if ($this->ReadPropertyBoolean('StartFollowUpOnSwitchOn')) {
+                $followUpTime = $this->getPresenceFollowUpTime();
+                $this->SetTimerInterval('PresenceFollowUp', $followUpTime * 1000);
+            }
 
             // Handle auto-off timer
             if ($this->isAutoOffActive()) {
@@ -804,6 +816,11 @@ class AdvancedLightControl extends IPSModule
         if ($anyPresence) {
             // Presence detected - cancel any follow-up timer
             $this->SetTimerInterval('PresenceFollowUp', 0);
+
+            // Lights are already on: renewed presence extends/resets auto-off timer
+            if ($masterSwitch && $this->isAutoOffActive()) {
+                $this->armAutoOffTimer();
+            }
 
             // Check if we should turn on lights
             if (!$masterSwitch) {
