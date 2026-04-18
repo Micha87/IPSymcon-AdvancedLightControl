@@ -22,6 +22,7 @@ class AdvancedLightControl extends IPSModule
 
         // ---- Properties: Presence Detectors ----
         $this->RegisterPropertyString('PresenceDetectors', '[]');
+        $this->RegisterPropertyBoolean('StartFollowUpOnSwitchOn', false);
 
         // ---- Properties: Brightness Sensor ----
         $this->RegisterPropertyInteger('BrightnessSensor', 0);
@@ -269,6 +270,11 @@ class AdvancedLightControl extends IPSModule
                     'caption' => 'Presence Detection',
                     'items' => [
                         [
+                            'type' => 'CheckBox',
+                            'name' => 'StartFollowUpOnSwitchOn',
+                            'caption' => 'Start Follow-Up Timer when lights are switched on'
+                        ],
+                        [
                             'type' => 'List',
                             'name' => 'PresenceDetectors',
                             'caption' => 'Presence Detectors',
@@ -379,7 +385,12 @@ class AdvancedLightControl extends IPSModule
 
             case 'AutoOffEnabled':
                 SetValue($this->GetIDForIdent('AutoOffEnabled'), (bool)$Value);
-                if (!(bool)$Value) {
+                if ((bool)$Value) {
+                    $masterSwitch = (bool)@GetValue($this->GetIDForIdent('MasterSwitch'));
+                    if ($masterSwitch) {
+                        $this->armAutoOffTimer();
+                    }
+                } else {
                     $this->stopTimer();
                 }
                 break;
@@ -517,6 +528,12 @@ class AdvancedLightControl extends IPSModule
             $this->WriteAttributeBoolean('AutoOffTriggered', false);
             $this->SetTimerInterval('PresenceFollowUp', 0);
 
+            // Optionally start presence follow-up timer immediately on switch-on
+            if ($this->ReadPropertyBoolean('StartFollowUpOnSwitchOn')) {
+                $followUpTime = $this->getPresenceFollowUpTime();
+                $this->SetTimerInterval('PresenceFollowUp', $followUpTime * 1000);
+            }
+
             // Handle auto-off timer
             if ($this->isAutoOffActive()) {
                 $this->armAutoOffTimer();
@@ -625,7 +642,12 @@ class AdvancedLightControl extends IPSModule
     public function SetAutoOffEnabled(bool $Enabled): void
     {
         SetValue($this->GetIDForIdent('AutoOffEnabled'), $Enabled);
-        if (!$Enabled) {
+        if ($Enabled) {
+            $masterSwitch = (bool)@GetValue($this->GetIDForIdent('MasterSwitch'));
+            if ($masterSwitch) {
+                $this->armAutoOffTimer();
+            }
+        } else {
             $this->stopTimer();
         }
     }
